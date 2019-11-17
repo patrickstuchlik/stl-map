@@ -79,7 +79,7 @@ def make_plot(source,bgvar):
        p.add_layout(color_bar, 'right')
        return p
 
-bef_select = Select(value='Uninsured', title='Built Environment Feature', options=sorted(bef.keys()))
+bef_select = Select(value='Uninsured (%)', title='Built Environment Feature', options=sorted(bef.keys()))
 bef1 = bef_select.value
 
 df = parse_json(urlbokeh)

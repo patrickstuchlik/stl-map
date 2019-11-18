@@ -10,6 +10,14 @@ import bokeh
 from bokeh import palettes
 from bokeh.layouts import row, column, layout
 from bokeh.models.widgets import Select
+from bokeh.tile_providers import get_provider, Vendors
+import pyproj
+
+tile_provider = get_provider(Vendors.CARTODBPOSITRON)
+
+crs = pyproj.CRS.from_epsg(3857)
+
+proj = pyproj.Transformer.from_crs(crs.geodetic_crs,crs)
 
 def parse_json(url):
        r = requests.get(url)
@@ -53,7 +61,27 @@ def get_dataset(src,bg):
        # df2['outp_life']=df['outp_life']
        # df2['outp_outp']=df['outp_outp']
        # df2[str(bg)] = df[str(bg)]
+
        return ColumnDataSource(data=df)
+
+def web_mercator(df):
+       testlist1 = []
+       for sublist in list(zip(df['xs'],df['ys'])):
+              testlist1.append(list(zip(*sublist)))
+
+       ptest = []
+       for tract in testlist1:
+              ptest.append([proj.transform(pt[1],pt[0]) for pt in tract])
+
+       xlist = []
+       ylist = []
+       for tract in ptest:
+              xlist.append([i[0] for i in tract])
+              ylist.append([i[1] for i in tract])
+
+       df['xs'] = xlist
+       df['ys'] = ylist
+       return df
 
 def make_plot(source,bgvar):
        #Define a sequential multi-hue color palette.
@@ -70,19 +98,22 @@ def make_plot(source,bgvar):
        color_bar = ColorBar(color_mapper=color_mapper, label_standoff=8,width = 20, height = 500,
        border_line_color=None,location = (0,0), orientation = 'vertical',ticker=ticker)
        #Create figure object.
-       p = figure(title = 'Life Expectancy', plot_height = 600 , plot_width = 450, toolbar_location = None, tools=[hover])
+       p = figure(title = 'Life Expectancy', plot_height = 600 , plot_width = 450, toolbar_location = None, tools=[hover],x_range=(-10060000, -10035000), y_range=(4658000, 4685000), x_axis_type="mercator", y_axis_type="mercator")
+       p.add_tile(tile_provider)
        p.xgrid.grid_line_color = None
        p.ygrid.grid_line_color = None
        #Add patch renderer to figure. 
        p.patches('xs','ys', source = source,fill_color = {'field' :str(bgvar), 'transform' : color_mapper}, line_color = 'black', line_width = 0.25, fill_alpha = 1)
        #Specify figure layout.
        p.add_layout(color_bar, 'right')
+       
        return p
 
 bef_select = Select(value='Uninsured (%)', title='Built Environment Feature', options=sorted(bef.keys()))
 bef1 = bef_select.value
 
-df = parse_json(urlbokeh)
+df_start = parse_json(urlbokeh)
+df = web_mercator(df_start)
 source = get_dataset(df,bef[bef1])
 plot1 = make_plot(source,bef[bef_select.value])
 

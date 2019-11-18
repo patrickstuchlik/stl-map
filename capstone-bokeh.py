@@ -103,7 +103,7 @@ def make_plot(source,bgvar):
        p.xgrid.grid_line_color = None
        p.ygrid.grid_line_color = None
        #Add patch renderer to figure. 
-       p.patches('xs','ys', source = source,fill_color = {'field' :str(bgvar), 'transform' : color_mapper}, line_color = 'black', line_width = 0.25, fill_alpha = 1)
+       p.patches('xs','ys', source = source,fill_color = {'field' :str(bgvar), 'transform' : color_mapper}, line_color = 'black', line_width = 0.25, fill_alpha = 0.26)
        #Specify figure layout.
        p.add_layout(color_bar, 'right')
        

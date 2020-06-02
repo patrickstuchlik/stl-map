@@ -1,6 +1,6 @@
 import pandas as pd
 import requests
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import json
 from bokeh.io import output_notebook, show, output_file, curdoc
 from bokeh.plotting import figure
